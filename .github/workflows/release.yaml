@@ -24,10 +24,39 @@ jobs:
         with:
           version: v3.8.1
 
-      - name: Build Helm chart dependencies
+      - name: Debug Chart Directory
         run: |
+          echo "Chart directory contents:"
+          ls -la ./charts/django-app/
+          echo "Chart.yaml contents:"
+          cat ./charts/django-app/Chart.yaml
+
+      - name: Build Helm Dependencies
+        run: |
+          echo "Adding bitnami repo..."
           helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm dependency build ./charts/django-app/
+          helm repo update
+
+          echo "Building dependencies..."
+          helm dependency update ./charts/django-app/
+
+          echo "Checking if charts directory was created..."
+          ls -la ./charts/django-app/
+
+          if [ -d "./charts/django-app/charts" ]; then
+            echo "Charts directory exists, listing contents:"
+            ls -la ./charts/django-app/charts/
+          else
+            echo "Charts directory does not exist, creating it manually..."
+            mkdir -p ./charts/django-app/charts
+          fi
+
+          echo "Checking for Chart.lock file..."
+          if [ -f "./charts/django-app/Chart.lock" ]; then
+            cat ./charts/django-app/Chart.lock
+          else
+            echo "Chart.lock file does not exist."
+          fi
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
