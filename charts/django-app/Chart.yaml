@@ -1,8 +1,7 @@
 apiVersion: v2
 name: django-app
 description: A Helm chart for deploying Django applications on Kubernetes
-type: application
-version: 0.1.6
+version: 0.1.7
 appVersion: "1.0.0"
 home: https://github.com/carloshm91/django-helm
 sources:
@@ -14,14 +13,11 @@ maintainers:
 icon: https://www.djangoproject.com/favicon.ico
 dependencies:
   - name: redis
-    condition: redis.enabled
-    version: ^20
-    repository: https://charts.bitnami.com/bitnami
+    version: 19.5.6
+    repository: "https://charts.bitnami.com/bitnami"
   - name: rabbitmq
-    condition: rabbitmq.enabled
-    version: ^15
-    repository: https://charts.bitnami.com/bitnami
+    version: 12.4.3
+    repository: "https://charts.bitnami.com/bitnami"
   - name: postgresql
-    condition: postgresql.enabled
-    version: ^16
-    repository: https://charts.bitnami.com/bitnami
+    version: 15.0.3
+    repository: "https://charts.bitnami.com/bitnami"
