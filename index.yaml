@@ -3,6 +3,33 @@ entries:
   django-app:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2025-05-20T13:03:38.224109866Z"
+    dependencies:
+    - name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 20.5.0
+    - name: rabbitmq
+      repository: https://charts.bitnami.com/bitnami
+      version: 15.2.0
+    - name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 16.3.0
+    description: A Helm chart for deploying Django applications on Kubernetes
+    digest: 6abbf33246720796237d163a7fc0ea5512b5716e48caa97841fa0bbbc14bc309
+    home: https://github.com/carloshm91/django-helm
+    icon: https://www.djangoproject.com/favicon.ico
+    maintainers:
+    - email: carloshm91@gmail.com
+      name: Carlos Herrera
+      url: https://github.com/carloshm91
+    name: django-app
+    sources:
+    - https://github.com/carloshm91/django-helm
+    urls:
+    - https://github.com/carloshm91/django-helm/releases/download/django-app-0.1.16/django-app-0.1.16.tgz
+    version: 0.1.16
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2025-05-20T04:41:40.684790694Z"
     dependencies:
     - name: redis
@@ -28,4 +55,4 @@ entries:
     urls:
     - https://github.com/carloshm91/django-helm/releases/download/django-app-0.1.15/django-app-0.1.15.tgz
     version: 0.1.15
-generated: "2025-05-20T04:41:40.68480485Z"
+generated: "2025-05-20T13:03:38.224120747Z"
