@@ -1,0 +1,55 @@
+{{- if .Values.broker.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "django.fullname" . }}-broker
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "django.labels" . | nindent 4 }}
+    app.kubernetes.io/component: broker
+spec:
+  replicas: {{ .Values.broker.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "django.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: broker
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/config/configmap.yaml") . | sha256sum }}
+      labels:
+        {{- include "django.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: broker
+    spec:
+      serviceAccountName: {{ include "django.serviceAccountName" . }}
+      containers:
+        - name: broker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - {{ .Values.broker.command | quote }}
+          {{- include "django.envFrom" . | nindent 10 }}
+          env:
+            {{- include "django.redisEnv" . | nindent 12 }}
+            {{- include "django.rabbitmqEnv" . | nindent 12 }}
+            {{- include "django.postgresqlEnv" . | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 8085
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.broker.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

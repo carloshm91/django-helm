@@ -1,0 +1,37 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your Django application is now deploying. Here's what's happening:
+
+1. Django application: {{ .Values.django.replicaCount }} replicas
+2. Celery workers: {{ .Values.celery.worker.replicaCount }} replicas
+3. Celery beat: {{ if .Values.celery.beat.enabled }}Enabled{{ else }}Disabled{{ end }}
+4. MQTT Broker: {{ if .Values.broker.enabled }}Enabled{{ else }}Disabled{{ end }}
+
+{{- if .Values.ingress.enabled }}
+You can access your application at:
+{{- range .Values.ingress.hosts }}
+  https://{{ .host }}
+{{- end }}
+{{- else }}
+You can access your application by port-forwarding to the service:
+  kubectl port-forward -n {{ .Values.namespace.name }} svc/{{ include "django.fullname" . }}-backend {{ .Values.service.port }}:{{ .Values.service.port }}
+
+Then navigate to: http://localhost:{{ .Values.service.port }}
+{{- end }}
+
+{{- if or .Values.postgresql.enabled .Values.redis.enabled .Values.rabbitmq.enabled }}
+The following services are deployed with your application:
+{{- if .Values.postgresql.enabled }}
+- PostgreSQL database: {{ .Release.Name }}-postgresql
+{{- end }}
+{{- if .Values.redis.enabled }}
+- Redis: {{ .Release.Name }}-redis-master
+{{- end }}
+{{- if .Values.rabbitmq.enabled }}
+- RabbitMQ: {{ .Release.Name }}-rabbitmq
+{{- end }}
+{{- else }}
+Your application is configured to use external services.
+{{- end }}
+
+For more information, see the README.md file in the chart repository.

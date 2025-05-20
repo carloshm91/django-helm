@@ -1,0 +1,20 @@
+{{- if .Values.broker.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "django.fullname" . }}-broker
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "django.labels" . | nindent 4 }}
+    app.kubernetes.io/component: broker
+spec:
+  type: {{ .Values.broker.service.type }}
+  ports:
+    - port: {{ .Values.broker.service.port }}
+      targetPort: 8085
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "django.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: broker
+{{- end }}

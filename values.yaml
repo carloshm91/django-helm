@@ -1,0 +1,239 @@
+# General settings
+nameOverride: ""
+fullnameOverride: ""
+
+# Namespace configuration
+namespace:
+  create: true
+  name: "django"
+
+# Image configuration
+image:
+  repository: ""
+  tag: "latest"
+  pullPolicy: IfNotPresent
+  containerPort: 8000
+
+# Service account configuration
+serviceAccount:
+  create: true
+  automount: true
+  annotations: { }
+  name: ""
+
+# Secret management
+envSecrets:
+  # Options for managing secrets
+  enabled: true
+  # Create secrets from values
+  create: false
+  # Use existing secret
+  name: "django-secrets"
+  # External secrets integration
+  external:
+    enabled: false
+    secretStore: ""
+    secretName: ""
+
+# ConfigMap with non-sensitive configuration
+envConfigs:
+  # Django configuration
+  DJANGO_SETTINGS_MODULE: "backend.settings.production"
+  DEBUG: "False"
+  ALLOWED_HOSTS: "['*']"
+  CORS_ALLOWED_ORIGINS: "['https://example.com']"
+  CSRF_TRUSTED_ORIGINS: "['https://example.com']"
+  CELERY_TASK_SERIALIZER: "json"
+  CELERY_RESULT_SERIALIZER: "json"
+
+# Django application configuration
+django:
+  enabled: true
+  replicaCount: 2
+  command: "/code/run.sh"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 384Mi
+  probes:
+    liveness:
+      enabled: true
+      path: /health/
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 3
+    readiness:
+      enabled: true
+      path: /health/
+      initialDelaySeconds: 15
+      periodSeconds: 10
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 3
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
+# MQTT Broker configuration
+broker:
+  enabled: true
+  replicaCount: 1
+  command: "python3 broker.py"
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  service:
+    type: ClusterIP
+    port: 8085
+
+# Celery configuration
+celery:
+  # Celery Beat
+  beat:
+    enabled: true
+    command: "celery -A backend beat -l INFO"
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  # Celery Worker
+  worker:
+    enabled: true
+    command: "celery -A backend worker --concurrency 3 -l INFO"
+    replicaCount: 2
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 200m
+        memory: 384Mi
+    autoscaling:
+      enabled: false
+      minReplicas: 2
+      maxReplicas: 6
+      targetCPUUtilizationPercentage: 80
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 80
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+  hosts:
+    - host: django.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: django-tls
+      hosts:
+        - django.example.com
+
+# Jobs configuration
+jobs:
+  migrations:
+    enabled: true
+    name: "migrations"
+    command: "python manage.py migrate --noinput"
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  collectstatic:
+    enabled: true
+    name: "collectstatic"
+    command: "python manage.py collectstatic --noinput"
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+# Redis configuration
+redis:
+  # Set to true to deploy Redis with this chart
+  enabled: false
+
+  # Redis connection configuration for external Redis
+  external:
+    # Set to true when using external Redis
+    enabled: true
+    host: "your-redis-host"
+    port: 6379
+    # For password protected Redis, set in secrets
+
+# RabbitMQ configuration
+rabbitmq:
+  # Set to true to deploy RabbitMQ with this chart
+  enabled: false
+
+  # RabbitMQ auth configuration for built-in instance
+  auth:
+    username: guest
+    password: guest
+
+  # RabbitMQ connection configuration for external instance
+  external:
+    # Set to true when using external RabbitMQ
+    enabled: true
+    host: "your-rabbitmq-host"
+    port: 5672
+    user: "guest"
+    vhost: "/"
+    # Password should be in secrets
+
+# PostgreSQL configuration
+postgresql:
+  # Set to true to deploy PostgreSQL with this chart
+  enabled: false
+
+  # PostgreSQL auth for built-in instance
+  auth:
+    username: postgres
+    password: postgres
+    database: django
+
+  # PostgreSQL connection configuration for external instance
+  external:
+    # Set to true when using external PostgreSQL
+    enabled: true
+    host: "your-db-host"
+    port: 5432
+    database: "django"
+    user: "postgres"
+    # Password should be in secrets
+    sslMode: "require"
+
+# Node selection and tolerations
+nodeSelector: { }
+tolerations: [ ]
+affinity: { }

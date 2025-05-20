@@ -1,0 +1,13 @@
+{{- if .Values.envConfigs -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "django.fullname" . }}-config
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "django.labels" . | nindent 4 }}
+data:
+  {{- range $key, $val := .Values.envConfigs }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end }}
+{{- end }}
