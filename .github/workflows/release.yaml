@@ -30,8 +30,37 @@ jobs:
       - name: Build chart dependencies
         run: helm dependency build ./charts/django-app
 
+      - name: Debug - List Contents
+        run: |
+          echo "Repository Contents:"
+          ls -la
+          echo "\nChart Contents:"
+          ls -la ./charts/django-app/
+          echo "\nChart.yaml:"
+          cat ./charts/django-app/Chart.yaml
+
       - name: Release charts
         uses: helm/chart-releaser-action@v1.5.0
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CR_SKIP_EXISTING: true
           CR_PACKAGE_HELM_ARGS: --dependency-update
+
+      - name: Debug - Check gh-pages branch
+        if: always()
+        run: |
+          git fetch origin gh-pages
+          if git branch -r | grep -q "origin/gh-pages"; then
+            echo "gh-pages branch exists"
+            git checkout gh-pages
+            echo "\ngh-pages Contents:"
+            ls -la
+            if [ -f "index.yaml" ]; then
+              echo "\nindex.yaml exists:"
+              cat index.yaml
+            else
+              echo "\nindex.yaml does not exist"
+            fi
+          else
+            echo "gh-pages branch does not exist"
+          fi
